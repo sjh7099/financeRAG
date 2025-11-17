@@ -9,6 +9,7 @@ from retrieval import HybridSearcher, DenseRetrieval, CrossEncoderReranker
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 from ollama import Client
 from post_retrieval import SelectionAgent
+from law_utils import prioritize_doc_ids
 import argparse
 import time
 
@@ -156,6 +157,10 @@ def run(arg):
     for qid, cand in results.items():
         sorted_docs = sorted(cand.items(), key=lambda x: x[1], reverse=True)
         # 문서 본문만 추출
+        
+        # 법령 추출 기반 우선순위 재정렬 적용
+        sorted_docs = prioritize_doc_ids(sorted_docs, corpus, queries[qid])
+        
         doc_texts = [corpus[doc_id]["text"] for doc_id, _ in sorted_docs]
         query_to_docs[queries[qid]] = doc_texts
 
